@@ -1,0 +1,5 @@
+REPO_URL=git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
+BRANCH=v5.4.65
+CONFIG_URL=https://kernel.ubuntu.com/~kernel-ppa/config/bionic/linux-hwe-5.4/5.4.0-54.60~18.04.1/amd64-config.flavour.generic
+APPEND_VER=-gvt
+REVISION=3.0.0
