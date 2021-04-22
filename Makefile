@@ -1,4 +1,4 @@
-all: check build output clean
+all: check build clean
 
 .PHONY: check
 check:
@@ -6,16 +6,18 @@ check:
 
 .PHONY: build
 build:
-	@echo "Build linux_box image"
+	@echo "Build linux_box image and linux kernel"
 	@docker build -t linux_box:latest . 
-
-.PHONY: output
-output:
-	@echo "Copy output to local build/ folder"
+	@echo "Copy artifacts to local build/ folder"
 	@if [ -d build ]; then rm -rf build; fi;
 	@docker create --name linux_box_inst linux_box
 	@docker cp linux_box_inst:/build build
 	@docker rm -f linux_box_inst
+
+.PHONY: install
+Install:
+	@echo "Install linux kernel"
+	@sudo dpkg -i ./build/*.deb
 
 .PHONY: clean
 clean:
