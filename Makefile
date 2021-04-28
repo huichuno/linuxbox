@@ -27,9 +27,9 @@ clean:
 .PHONY: help
 help:
 	@echo "Targets:"
-	@echo "  all            - Build all"
+	@echo "  all            - Check, Build, Clean"
 	@echo "  check          - Basic sanity check"
 	@echo "  build          - Build linux_box docker image and linux kernel artifacts"
-	@echo "  output         - Copy artifacts to local 'build/' folder"
+	@echo "  install        - Install artifacts"
 	@echo "  clean          - Delete linux_box docker image"
 	@echo ""
