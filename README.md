@@ -19,7 +19,7 @@ sudo apt install docker-ce
 sudo usermod -aG docker ${USER}
 
 # Quick Start
-git clone https://github.com/huichuno/qemubox.git
+git clone https://github.com/huichuno/linuxbox.git
 
 make help
 
