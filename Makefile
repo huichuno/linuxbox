@@ -15,9 +15,9 @@ build:
 	@docker rm -f linux_box_inst
 
 .PHONY: install
-Install:
+install:
 	@echo "Install linux kernel"
-	@sudo dpkg -i ./build/*.deb
+	@./install.sh
 
 .PHONY: clean
 clean:
