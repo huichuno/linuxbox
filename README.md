@@ -25,7 +25,7 @@ make help
 
 make
 
-make install
+sudo make install
 
 # Config
 Update REPO_URL, BRANCH, CONFIG_URL, APPEND_VER and REVISION parameters in 'conf' file to the desired value. Refer to 'conf.bionic' and 'conf.focal' files for example.
@@ -59,13 +59,13 @@ File format: *.patch
 
 - Build qemu artifacts through docker build process
 
-"make install"
-
-- Install artifacts from build/ folder 
-
 "make clean"
 
 - Delete docker image
+
+"sudo make install"
+
+- Execute install.sh script to install artifacts from build/ folder and perform other operations. Look at install.sh for details.
 
 "make help"
 
