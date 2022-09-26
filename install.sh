@@ -1,8 +1,21 @@
 #!/bin/bash
 
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-RED='\033[0;31m'
+set -e
+
+# helper functions
+info()
+{
+  echo '[INFO] ' "$@"
+}
+warn()
+{
+  echo '[WARN] ' "$@" >&2
+}
+fatal()
+{
+  echo '[ERROR] ' "$@" >&2
+  exit 1
+}
 
 source conf
 
@@ -11,7 +24,7 @@ BUILD_DIR=$WORK_DIR/build
 INITRD_TOOL_DIR=/etc/initramfs-tools
 GRUB_DIR=/etc/default
 
-function update_initrd()
+update_initrd()
 {
   for module in $*
   do
@@ -21,57 +34,58 @@ function update_initrd()
       echo $module >> $INITRD_TOOL_DIR/modules
     fi
   done
-  sudo update-initramfs -u -k "all"
+  $SUDO update-initramfs -u -k "all"
 }
 
-function update_grub_cmdline()
+update_grub_cmdline()
 {
   sed -i "s/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX=\"$*\"/g" $GRUB_DIR/grub
 }
 
-function update_grub_default()
+update_grub_default()
 {
-  sed -i "s/GRUB_DEFAULT=.*/GRUB_DEFAULT=\"$*\"/g" $GRUB_DIR/grub
+  sed -i "s/GRUB_DEFAULT=.*/GRUB_DEFAULT='Advanced options for Ubuntu>Ubuntu, with Linux $*'/g" $GRUB_DIR/grub
 }
 
-function persist_grub_update()
+persist_grub_update()
 {
   update-grub2
 }
 
-# check for sudo 
-if [[ $EUID -ne 0 ]]
-then
-    echo -e "${RED}Run script as superuser"
-    exit 1
-fi
-
-# update initrd
-if [[ -z $LOAD_MODULES ]]
-then 
-  echo -e "${YELLOW}\$LOAD_MODULES param is not set"
-else
-  update_initrd $LOAD_MODULES
+SUDO=sudo
+if [[ $(id -u) -eq 0 ]]; then
+  SUDO=
 fi
 
 # install kernel deb files
 files=$(ls $BUILD_DIR/*.deb 2> /dev/null | wc -l)
-if [[ $files -eq 0 ]]
-then
-    echo -e "${RED}Kernel packages not found. Installation aborted"
-    exit 1
-else
-    dpkg -i $BUILD_DIR/*.deb
+if [[ $files -eq 0 ]]; then
+  fatal "Kernel packages not found. Installation aborted"
+  exit 1
 fi
+
+dpkg -i $BUILD_DIR/*.deb
 
 # update grub
-if [[ -z $GRUB_CMDLINE || -z $GRUB_DEFAULT ]]
-then 
-  echo -e "${YELLOW}Either one or more GRUB params are not set"
-else
-  update_grub_cmdline $GRUB_CMDLINE
-  update_grub_default $GRUB_DEFAULT
-  persist_grub_update
+kernel_file_version=$(ls $BUILD_DIR/linux-headers*.deb | grep -Po 'linux-headers-\K[^_]*')
+if [[ -z $kernel_file_version ]]; then
+  fatal "Fail to retrive kernel file version"
+  exit 1
 fi
 
-echo -e "${GREEN}Installation completed"
+update_grub_default $kernel_file_version
+
+if [[ -z $GRUB_CMDLINE ]]; then
+  fatal "$GRUB_CMDLINE param not set"
+  exit 1
+fi
+
+update_grub_cmdline $GRUB_CMDLINE
+persist_grub_update
+
+# update initrd
+if [[ ! -z $LOAD_MODULES ]]; then
+  update_initrd $LOAD_MODULES
+fi
+
+echo "Please reboot the system for change to take effect"

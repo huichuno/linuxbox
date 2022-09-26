@@ -2,20 +2,21 @@
 # https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
 # https://kernel.ubuntu.com/~kernel-ppa/config/
 
-FROM ubuntu:focal
+FROM ubuntu:jammy
 LABEL maintainer="Hui Chun Ong"
 
 ENV PACKAGES bison \
+    bc \
     build-essential \
+    cpio \
     curl \
     fakeroot \
     flex \
     git \
-    kernel-package \
+    kmod \
     libelf-dev \
-    libncurses5-dev \
     libssl-dev \
-    liblz4-tool \
+    ncurses-dev  \
     rsync \
     xz-utils
 
@@ -31,22 +32,18 @@ RUN dpkg -l ${PACKAGES} | sort > packages.txt
 
 COPY conf ${BASE}/conf
 
-RUN REPO_URL=$(awk -F '=' '/^REPO_URL/{print $NF}' ${BASE}/conf); \
-    BRANCH=$(awk -F '=' '/^BRANCH/{print $NF}' ${BASE}/conf); \ 
-    git config --global advice.detachedHead false && \ 
+RUN REPO_URL=$(awk -F '=' '/^REPO_URL/{print $NF}' ${BASE}/conf) && \
+    BRANCH=$(awk -F '=' '/^BRANCH/{print $NF}' ${BASE}/conf) && \
+    git config --global advice.detachedHead false && \
     git clone --depth 1 ${REPO_URL} --branch ${BRANCH} --single-branch src
 
 COPY patches ${BASE}/patches
-
+COPY .config ${BASE}/src/.config
 WORKDIR ${BASE}/src
 
-RUN CONFIG_URL=$(awk -F '=' '/^CONFIG_URL/{print $NF}' ${BASE}/conf); \
-    git apply ${BASE}/patches/*.patch &>/dev/null && \
-    curl ${CONFIG_URL} -o .config && \   
-    yes ""|make oldconfig
- 
-RUN APPEND_VER=$(awk -F '=' '/^APPEND_VER/{print $NF}' ${BASE}/conf); \ 
-    REVISION=$(awk -F '=' '/^REVISION/{print $NF}' ${BASE}/conf); \
-    CONCURRENCY_LEVEL=$(nproc); \
-    fakeroot make-kpkg --initrd --append-to-version=${APPEND_VER} --revision=${REVISION} --overlay-dir=/usr/share/kernel-package kernel_image kernel_headers && \
-    mkdir /build && cp ../*.deb /build
+RUN git apply ${BASE}/patches/*.patch &>/dev/null && \
+    echo "" | make ARCH=x86_64 olddefconfig && \
+    LOCALVERSION=$(awk -F '=' '/^LOCALVERSION/{print $NF}' ${BASE}/conf) && \
+    make ARCH=x86_64 -j$(nproc) LOCALVERSION=${LOCALVERSION} bindeb-pkg && \
+    mkdir /build && \
+    cp ../*.deb /build

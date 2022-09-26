@@ -7,9 +7,11 @@ check:
 .PHONY: build
 build:
 	@echo "Build linux_box image and linux kernel"
-	@docker build -t linux_box:latest . 
+	@./download.sh
+	@docker build -t linux_box:latest .
+	@rm -f .config
 	@echo "Copy artifacts to local build/ folder"
-	@if [ -d build ]; then rm -rf build; fi;
+	@if [[ -d build ]]; then rm -rf build; fi;
 	@docker create --name linux_box_inst linux_box
 	@docker cp linux_box_inst:/build build
 	@docker rm -f linux_box_inst
@@ -23,6 +25,8 @@ install:
 clean:
 	@echo "Delete linux_box image" 
 	@docker rmi -f linux_box:latest
+	@rm -f .config
+	@rm -rf build
 
 .PHONY: help
 help:
