@@ -1,6 +1,15 @@
 REPO_URL=https://github.com/intel/linux-intel-lts.git
+
 BRANCH=lts-v5.15.44-adl-linux-220616T112508Z
-CONFIG_URL=./kernel-config/x86_64_defconfig
-LOCALVERSION=-lts2022
+
+CONFIG_URL=kernel-config/x86_64_defconfig
+
+LOCAL_VERSION=-lts2022
+
 GRUB_CMDLINE="i915.enable_guc=0x7 udmabuf.list_limit=8192 intel_iommu=on i915.force_probe=* console=ttyS0,115200n8"
+
 LOAD_MODULES="vfio-pci i2c-algo-bit"
+
+PRE_RUN="misc/download_adl_firmware.sh"
+
+POST_RUN=

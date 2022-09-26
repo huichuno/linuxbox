@@ -24,6 +24,15 @@ BUILD_DIR=$WORK_DIR/build
 INITRD_TOOL_DIR=/etc/initramfs-tools
 GRUB_DIR=/etc/default
 
+exec_run()
+{
+  for run in $*
+  do
+    echo "executing $run"
+    source $run
+  done
+}
+
 update_initrd()
 {
   for module in $*
@@ -52,9 +61,21 @@ persist_grub_update()
   update-grub2
 }
 
+echo ""
+read -p "Install Linux kernel and change system configuration, do you want to continue? [y/n]: " res
+if [[ $res != y ]]; then
+  echo "Abort installation"
+  exit 0
+fi
+
 SUDO=sudo
 if [[ $(id -u) -eq 0 ]]; then
   SUDO=
+fi
+
+# pre-run
+if [[ ! -z $PRE_RUN ]]; then
+  exec_run $PRE_RUN
 fi
 
 # install kernel deb files
@@ -88,4 +109,10 @@ if [[ ! -z $LOAD_MODULES ]]; then
   update_initrd $LOAD_MODULES
 fi
 
+# post-run
+if [[ ! -z $POST_RUN ]]; then
+  exec_run $POST_RUN
+fi
+
 echo "Please reboot the system for change to take effect"
+echo ""
