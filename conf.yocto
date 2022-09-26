@@ -1,5 +1,0 @@
-REPO_URL=https://github.com/intel/linux-intel-lts.git
-BRANCH=5.4/yocto
-CONFIG_URL=https://kernel.ubuntu.com/~kernel-ppa/config/focal/linux/5.4.0-54.60/amd64-config.flavour.generic
-APPEND_VER=-gvt
-REVISION=3.0.0
