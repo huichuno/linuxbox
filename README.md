@@ -7,22 +7,27 @@ Build Linux kernel in docker container
 
 ## Prerequisite
 
-Install Docker
-```sh
-sudo apt update && sudo apt -y upgrade
+* Install Docker
+  ```sh
+  sudo apt update && sudo apt -y upgrade
 
-sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
+  sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
 
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/  keyrings/docker-archive-keyring.gpg
 
-echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-  
-sudo apt update
+  echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.  docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list   > /dev/null
 
-sudo apt install docker-ce
+  sudo apt update
 
-sudo usermod -aG docker ${USER}
-```
+  sudo apt install docker-ce
+
+  sudo usermod -aG docker ${USER}
+  ```
+* If you are operating behind corporate firewall, setup the proxy settings before continue. Add the followings command to Dockerfile
+  ```sh
+  git config --global http.proxy <proxy server>:<port>
+  git config --global https.proxy <proxy server>:<port>
+  ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

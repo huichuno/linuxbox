@@ -23,9 +23,7 @@ ENV PACKAGES bison \
 RUN apt-get update && \
     apt-get -y -q upgrade && \
     DEBIAN_FRONTEND=noninteractive apt-get -y -q install ${PACKAGES} && \
-    apt-get clean && \
-    git config --global http.proxy http://proxy-dmz.intel.com:911 && \
-    git config --global https.proxy https://proxy-dmz.intel.com:911
+    apt-get clean
 
 ENV BASE=/project/linux
 
