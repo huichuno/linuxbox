@@ -23,7 +23,9 @@ ENV PACKAGES bison \
 RUN apt-get update && \
     apt-get -y -q upgrade && \
     DEBIAN_FRONTEND=noninteractive apt-get -y -q install ${PACKAGES} && \
-    apt-get clean
+    apt-get clean && \
+    git config --global http.proxy http://proxy-dmz.intel.com:911 && \
+    git config --global https.proxy https://proxy-dmz.intel.com:911
 
 ENV BASE=/project/linux
 
@@ -32,18 +34,19 @@ RUN dpkg -l ${PACKAGES} | sort > packages.txt
 
 COPY conf ${BASE}/conf
 
-RUN REPO_URL=$(awk -F '=' '/^REPO_URL/{print $NF}' ${BASE}/conf) && \
-    BRANCH=$(awk -F '=' '/^BRANCH/{print $NF}' ${BASE}/conf) && \
+RUN REPO_URL=$(awk -F '=' '/^REPO_URL/{print $NF}' ${BASE}/conf); \
+    BRANCH=$(awk -F '=' '/^BRANCH/{print $NF}' ${BASE}/conf); \
     git config --global advice.detachedHead false && \
     git clone --depth 1 ${REPO_URL} --branch ${BRANCH} --single-branch src
 
 COPY patches ${BASE}/patches
 COPY .config ${BASE}/src/.config
+
 WORKDIR ${BASE}/src
 
 RUN git apply ${BASE}/patches/*.patch &>/dev/null && \
     echo "" | make ARCH=x86_64 olddefconfig && \
-    LOCALVERSION=$(awk -F '=' '/^LOCALVERSION/{print $NF}' ${BASE}/conf) && \
-    make ARCH=x86_64 -j$(nproc) LOCALVERSION=${LOCALVERSION} bindeb-pkg && \
+    LOCAL_VERSION=$(awk -F '=' '/^LOCAL_VERSION/{print $NF}' ${BASE}/conf); \
+    make ARCH=x86_64 -j$(nproc) LOCAL_VERSION=${LOCAL_VERSION} bindeb-pkg && \
     mkdir /build && \
     cp ../*.deb /build
