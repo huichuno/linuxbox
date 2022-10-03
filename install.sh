@@ -17,13 +17,6 @@ fatal()
   exit 1
 }
 
-source conf
-
-WORK_DIR=`pwd`
-BUILD_DIR=$WORK_DIR/build
-INITRD_TOOL_DIR=/etc/initramfs-tools
-GRUB_DIR=/etc/default
-
 exec_run()
 {
   for run in $*
@@ -40,7 +33,7 @@ update_initrd()
     found=$(grep "^$module" $INITRD_TOOL_DIR/modules 2> /dev/null | wc -l)
     if [[ $found -eq 0 ]]
     then
-      echo $module >> $INITRD_TOOL_DIR/modules
+      echo $module | $SUDO tee -a $INITRD_TOOL_DIR/modules
     fi
   done
   $SUDO update-initramfs -u -k "all"
@@ -48,17 +41,17 @@ update_initrd()
 
 update_grub_cmdline()
 {
-  sed -i "s/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX=\"$*\"/g" $GRUB_DIR/grub
+  $SUDO sed -i "s/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX=\"$*\"/g" $GRUB_DIR/grub
 }
 
 update_grub_default()
 {
-  sed -i "s/GRUB_DEFAULT=.*/GRUB_DEFAULT='Advanced options for Ubuntu>Ubuntu, with Linux $*'/g" $GRUB_DIR/grub
+  $SUDO sed -i "s/GRUB_DEFAULT=.*/GRUB_DEFAULT='Advanced options for Ubuntu>Ubuntu, with Linux $*'/g" $GRUB_DIR/grub
 }
 
 persist_grub_update()
 {
-  update-grub2
+  $SUDO update-grub2
 }
 
 echo ""
@@ -67,6 +60,13 @@ if [[ $res != y ]]; then
   echo "Abort installation"
   exit 0
 fi
+
+source conf
+
+WORK_DIR=`pwd`
+BUILD_DIR=$WORK_DIR/build
+INITRD_TOOL_DIR=/etc/initramfs-tools
+GRUB_DIR=/etc/default
 
 SUDO=sudo
 if [[ $(id -u) -eq 0 ]]; then
@@ -85,7 +85,7 @@ if [[ $files -eq 0 ]]; then
   exit 1
 fi
 
-dpkg -i $BUILD_DIR/*.deb
+$SUDO dpkg -i $BUILD_DIR/*.deb
 
 # update grub
 kernel_file_version=$(ls $BUILD_DIR/linux-headers*.deb | grep -Po 'linux-headers-\K[^_]*')

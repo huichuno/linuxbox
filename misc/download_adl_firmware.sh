@@ -15,6 +15,6 @@ download_firmware(){
 tempdir=$(mktemp -d)
 pushd $tempdir
 download_firmware
-pushd
-sudo mv $tempdir/* abc
+popd
+$SUDO mv $tempdir/*.bin /lib/firmware/i915/
 rm -rf $tempdir
