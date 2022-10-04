@@ -45,6 +45,6 @@ WORKDIR ${BASE}/src
 RUN git apply ${BASE}/patches/*.patch &>/dev/null && \
     echo "" | make ARCH=x86_64 olddefconfig && \
     LOCAL_VERSION=$(awk -F '=' '/^LOCAL_VERSION/{print $NF}' ${BASE}/conf); \
-    make ARCH=x86_64 -j$(nproc) LOCAL_VERSION=${LOCAL_VERSION} bindeb-pkg && \
+    make ARCH=x86_64 -j$(nproc) LOCALVERSION=${LOCAL_VERSION} bindeb-pkg && \
     mkdir /build && \
     cp ../*.deb /build
